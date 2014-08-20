@@ -5,11 +5,19 @@
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+var a = new Point(100,100);
+var b = new Point(200,200);
+var c = new Point(200,100);
+var d = new Point(100,200);
 init(ctx);
-line(100,100,200,200);
-square(100, 200, 100);
-circle(400, 400, 100);
-point(450, 450);
+if (intersects(a,b,c,d)) {
+  ctx.strokeStyle = 'rgb(0, 255, 0)';
+} else {
+  ctx.strokeStyle = 'rgb(255, 0, 0)';
+}
+line(a,b);
+line(c,d);
+
 </script>
 </body>
 </html>

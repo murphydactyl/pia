@@ -1,6 +1,6 @@
 var ctx;
 
-function Point2d(x, y) {
+function Point(x, y) {
   this.x = x;
   this.y = y;
 }
@@ -35,6 +35,13 @@ function line(x0,y0,x1,y1) {
   ctx.stroke();
 }
 
+function line(a, b) {
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+}
+
 function rect(x, y, w, h) {
   ctx.beginPath();
   ctx.rect(x, y, w, h);
@@ -54,3 +61,22 @@ function circle(x, y, r) {
 function point(x, y) {
   circle(x, y, 1);
 }
+
+function cross(u, v) {
+  return (u.x * v.y - u.y * v.x);
+}
+
+function ccw(a,b,c) {
+  return cross(a,b) < cross(b,c);
+}
+
+function intersects(a,b,c,d) {
+  return (ccw(a,b,c) != ccw(a,b,d)) && ((ccw(a,c,d) != ccw(b,c,d)))
+}
+
+  // require that s1 not both horizontal/vertical
+
+
+
+    
+  
