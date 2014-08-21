@@ -1,10 +1,5 @@
 var ctx;
 
-function Point(x, y) {
-  this.x = x;
-  this.y = y;
-}
-
 function LineSegment(p0, p1) {
   this.a = p0;
   this.b = p1;
@@ -62,18 +57,17 @@ function point(x, y) {
   circle(x, y, 1);
 }
 
-function cross(u, v) {
-  return (u.x * v.y - u.y * v.x);
-}
+function clear() {
+  // Store the current transformation matrix
+  ctx.save();
 
-function ccw(a,b,c) {
-  return cross(a,b) < cross(b,c);
-}
+  // Use the identity matrix while clearing the canvas
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function intersects(a,b,c,d) {
-  return (ccw(a,b,c) != ccw(a,b,d)) && ((ccw(a,c,d) != ccw(b,c,d)))
+  // Restore the transform
+  ctx.restore();
 }
-
   // require that s1 not both horizontal/vertical
 
 
