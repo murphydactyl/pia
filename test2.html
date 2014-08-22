@@ -1,0 +1,50 @@
+<html>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+
+<body>
+<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+init(ctx);
+setInterval(redraw, 100);
+
+var a = new Point(100, 100);
+var b = new Point(canvas.width - 100, 100);
+
+var circ = new Circle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
+canvas.addEventListener('mousemove', function(evt) {
+  var rect = canvas.getBoundingClientRect();
+  var x = evt.clientX;
+  var y = evt.clientY;
+  if (y) {
+    a = new Point(a.x, y);
+    b = new Point(b.x, y);
+  }
+});
+
+function redraw() {
+  clear();
+  line(a, b);
+  circ.draw();
+  var intersections = circ.intersectionOf(a, b);
+  if (intersections) {
+    for (var i = 0; i < intersections.length; i++) {
+      var x = intersections[i];
+      stroke(0, 255, 0); 
+      if (x.x) {
+        circle(x.x, x.y, 3);
+      } else {
+        circle(x.p.x, x.p.y, 3);
+        circle(x.q.x, x.q.y, 3);
+      }
+    }
+  }
+}
+
+</script>
+</body>
+</html>

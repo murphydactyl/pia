@@ -1,24 +1,5 @@
 var ctx;
 
-function LineSegment(p0, p1) {
-  this.a = p0;
-  this.b = p1;
-  this.LengthSquared = function() {
-    dx = this.a.x - this.b.x;
-    dy = this.a.y - this.b.y;
-    return dx * dx + dy * dy;
-  }
-  this.length = function() {
-    return Math.sqrt(this.LengthSquared());
-  }
-  this.isHorizontal() = function() {
-    return this.a.x == this.b.x;
-  }
-  this.isVertical() = function() {
-    return this.a.y == this.b.y;
-  }
-}
-
 function init(context) {
   ctx = context;
 }
@@ -68,7 +49,16 @@ function clear() {
   // Restore the transform
   ctx.restore();
 }
-  // require that s1 not both horizontal/vertical
+
+function stroke(r,g,b,a) {
+  if (arguments.length == 1) {
+    ctx.strokeColor = 'rgb(' + r + ',' + r + ',' + r + ')';
+  } else if (arguments.length == 3) {
+    ctx.strokeColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+  } else if (arguments.length == 4) {
+    ctx.strokeColor = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+}
 
 
 
