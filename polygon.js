@@ -54,7 +54,26 @@ function Circle(ox, oy, radius, segments) {
     p.vertices[i] = new Point(x, y);
     p.edges[i] = {p: i, q: (i + 1) == segments ? 0 : i + 1};
   }
+  p.name = 'Circle';
   return p;
 }
 
+function Square(x, y, s, segments) {
+  if (segments == undefined) segments = 20;
+
+  var p = new Polygon();
+  p.vertices[0] = new Point(x + -s, y + -s);
+  p.vertices[1] = new Point(x + s, y + -s);
+  p.vertices[2] = new Point(x + s, y + s);
+  p.vertices[3] = new Point(x + -s, y + s);
+
+  p.edges[0] = {p: 0, q: 1};
+  p.edges[1] = {p: 1, q: 2};
+  p.edges[2] = {p: 2, q: 3};
+  p.edges[3] = {p: 3, q: 0};
+  p.name = 'Square';
+  return p;
+}
 Circle.prototype = new Polygon;
+Square.prototype = new Polygon;
+
