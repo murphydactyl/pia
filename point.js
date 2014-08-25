@@ -13,10 +13,12 @@ function add(p, q) {
   return new Point(p.x + q.x, p.y + q.y);
 }
 
+// Subtract point q from p.
 function subtract(p, q) {
   return new Point(p.x - q.x, p.y - q.y);
 }
 
+// Multiply point by scalar.
 function multiply(u, s) {
   return new Point(u.x * s, u.y * s);
 }
@@ -35,6 +37,34 @@ function crosses(x1, x2, x3, x4) {
   var g = subtract(x3, x1);
   return cross(a, f) * cross(a, g) <= 0;
 }
+
+function rotate(p, o, angle) {
+  p = subtract(p, o);
+  var cos = Math.cos(angle);
+  var sin = Math.sin(angle);
+  var x = p.x * cos - p.y * sin + o.x;
+  var y = p.x * sin + p.y * cos + o.y;
+  p.x = x;
+  p.y = y;
+  return p;
+}
+
+function rescale(p, o, d) {
+  var v = subtract(p, o);
+  var s = d / Math.sqrt(dot(v, v));
+  return new Point(v.x * s + o.x, v.y * s + o.y);
+}
+
+function rebase(q, p, o) {
+  var u = rescale(p, o, 1.0);
+  var v = rotate(u, o, Math.PI/2);
+  var oq = subtract(q, o);
+  var x = o.x + oq.x * u.x + oq.y * u.y;
+  var y = o.x + oq.x * v.x + oq.y * v.y;
+  return new Point(x, y);
+}
+  
+
 
 // Check for intersection of two line segments (x1, x2) and (x3, x4)
 // In general, the intersection of two line segments is

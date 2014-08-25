@@ -1,7 +1,9 @@
 var ctx;
 
+
 function init(context) {
   ctx = context;
+  ctx.font = '24pt Calibri';
 }
 
 function line(x0,y0,x1,y1) {
@@ -24,6 +26,14 @@ function rect(x, y, w, h) {
   ctx.stroke();
 }
 
+function fillRect(x, y, w, h) {
+  ctx.fillRect(x, y, w, h);
+}
+
+function text(msg, x, y) {
+  ctx.fillText(msg, x, y);
+}
+
 function square(x, y, s) {
   rect(x, y, s, s);
 }
@@ -37,6 +47,8 @@ function circle(x, y, r) {
 function point(x, y) {
   circle(x, y, 1);
 }
+
+
 
 function clear() {
   // Store the current transformation matrix
@@ -52,11 +64,21 @@ function clear() {
 
 function stroke(r,g,b,a) {
   if (arguments.length == 1) {
-    ctx.strokeColor = 'rgb(' + r + ',' + r + ',' + r + ')';
+    ctx.strokeStyle = 'rgb(' + r + ',' + r + ',' + r + ')';
   } else if (arguments.length == 3) {
-    ctx.strokeColor = 'rgb(' + r + ',' + g + ',' + b + ')';
+    ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
   } else if (arguments.length == 4) {
-    ctx.strokeColor = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
+    ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+}
+
+function fill(r,g,b,a) {
+  if (arguments.length == 1) {
+    ctx.fillStyle = 'rgb(' + r + ',' + r + ',' + r + ')';
+  } else if (arguments.length == 3) {
+    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+  } else if (arguments.length == 4) {
+    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
 }
 
