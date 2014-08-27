@@ -31,6 +31,10 @@ function cross(p, q) {
   return p.x * q.y - p.y * q.x;
 }
 
+function above(p, a, b) {
+  return cross(subtract(p, a), subtract(b, a)) < 0;
+}
+
 function crosses(x1, x2, x3, x4) {
   var a = subtract(x2, x1);
   var f = subtract(x4, x1);
@@ -55,16 +59,23 @@ function rescale(p, o, d) {
   return new Point(v.x * s + o.x, v.y * s + o.y);
 }
 
-function rebase(q, p, o) {
-  var u = rescale(p, o, 1.0);
-  var v = rotate(u, o, Math.PI/2);
-  var oq = subtract(q, o);
-  var x = o.x + oq.x * u.x + oq.y * u.y;
-  var y = o.x + oq.x * v.x + oq.y * v.y;
-  return new Point(x, y);
+function unit(p, o) {
+  var v = subtract(p, o);
+  var s = Math.sqrt(dot(v, v));
+  return new Point(v.x / s, v.y / s);
 }
-  
 
+// Make a basis from "y" vector p.
+function basis(p, o) {
+  var y = unit(p, o);
+  return {a: -y.y, b: y.x, c: y.x, d: y.y};
+}
+
+function rebase(p, b) { 
+  var x = p.x * b.a + p.y * b.b;
+  var y = p.x * b.c + p.y * b.d;
+  return new Point(x, y); 
+}
 
 // Check for intersection of two line segments (x1, x2) and (x3, x4)
 // In general, the intersection of two line segments is

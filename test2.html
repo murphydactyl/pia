@@ -20,6 +20,8 @@ var objects = [];
 objects[objects.length] = new Square(canvas.width / 2, canvas.height / 2, 40);
 objects[objects.length] = new Circle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
 
+objects[0].rotate(1);
+
 canvas.addEventListener('mousemove', function(evt) {
   var rect = canvas.getBoundingClientRect();
   var x = evt.clientX;

@@ -41,6 +41,15 @@ Polygon.prototype.draw = function() {
   }
 }
 
+Polygon.prototype.rotate = function(radians) {
+  var cos = Math.cos(radians);
+  var sin = Math.sin(radians);
+  for (i = 0; i < this.vertices.length; i++) {
+    var p = this.vertices[i];
+    this.vertices[i] = new Point(p.x + cos - p.y * sin, p.x * sin + p.y * cos);
+  }
+}
+
 function Circle(ox, oy, radius, segments) {
   if (segments == undefined) segments = 20;
 

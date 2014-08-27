@@ -48,9 +48,12 @@ function point(x, y) {
   circle(x, y, 1);
 }
 
+function clear(r, g, b, a) {
 
+  if (arguments.length > 0) {
+    fill(r, g, b, a);
+  }
 
-function clear() {
   // Store the current transformation matrix
   ctx.save();
 
@@ -60,26 +63,45 @@ function clear() {
 
   // Restore the transform
   ctx.restore();
+
+  if (arguments.length > 0) {
+    fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+function colorFromArgs(r, g, b, a) {
+  if (r >= 0 && g >= 0 && b >= 0 && a >= 0) {
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+
+  if (r >= 0 && g >= 0 && b >= 0) {
+    return 'rgba(' + r + ',' + g + ',' + b + ',1.0)';
+  }
+
+  if (r >= 0 && g >= 0) {
+    return 'rgba(' + r + ',' + r + ',' + r + ',' + g + ')';
+  }
+
+  if (r >= 0) {
+    return 'rgba(' + r + ',' + r + ',' + r + ',1.0)';
+  }
+
+  return 'rgba(0, 0, 0, 1.0)';
 }
 
 function stroke(r,g,b,a) {
-  if (arguments.length == 1) {
-    ctx.strokeStyle = 'rgb(' + r + ',' + r + ',' + r + ')';
-  } else if (arguments.length == 3) {
-    ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
-  } else if (arguments.length == 4) {
-    ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
-  }
+//  if (arguments.length == 1) {
+//    ctx.strokeStyle = 'rgb(' + r + ',' + r + ',' + r + ')';
+//  } else if (arguments.length == 3) {
+//    ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+//  } else if (arguments.length == 4) {
+//    ctx.strokeStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
+//  }
+  ctx.strokeStyle = colorFromArgs(r, g, b, a);
 }
 
 function fill(r,g,b,a) {
-  if (arguments.length == 1) {
-    ctx.fillStyle = 'rgb(' + r + ',' + r + ',' + r + ')';
-  } else if (arguments.length == 3) {
-    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
-  } else if (arguments.length == 4) {
-    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ',' + a + ')';
-  }
+  ctx.fillStyle = colorFromArgs(r, g, b, a);
 }
 
 
