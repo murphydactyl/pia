@@ -31,10 +31,6 @@ function cross(p, q) {
   return p.x * q.y - p.y * q.x;
 }
 
-function above(p, a, b) {
-  return cross(subtract(p, a), subtract(b, a)) < 0;
-}
-
 function crosses(x1, x2, x3, x4) {
   var a = subtract(x2, x1);
   var f = subtract(x4, x1);
@@ -77,6 +73,56 @@ function rebase(p, b) {
   return new Point(x, y); 
 }
 
+// Check for intersection of a ray (x1, x2) with line segment (x3, x4).
+function intersectionRayLine(a1, a2, b1, b2) {
+  var ua = subtract(a2, a1); 
+  var ub = subtract(b2, b1);
+  var axb = cross(ua, ub);
+  if (axb == 0) {
+    // Ray and segment are parallel.
+    if (!colinear(a1, b1, b2)) {
+      return false;
+    }
+    // Ray and segment are colinear.
+    var sb = between(b1, b2, a1);
+    var p = add(b1, multiply(ub, sb));
+    if (!b1.onRay(a1, a2)) {
+      b1 = false; 
+    }
+    if (!b2.onRay(a1, a2)) {
+      b2 = false;
+    }
+    if (sb >= 0 && sb <= 1) {
+      if (b1 && !b1.equals(p)) {
+        return {p: p, q: b1};
+      } else if (b2) {
+        return {p: p, q: b2};
+      }
+      return p;
+    }
+    if (b1) {
+      if (b2 && !b2.equals(b1)) {
+        return {p: b1, q: b2};
+      }
+      return b1;
+   } else if (b2) {
+     return b2;
+   } 
+   return false;
+  }
+  
+  var sa = cross(subtract(b1, a1), ub) / cross(ua, ub);
+  if (sa >= 0) {
+    var p = add(a1, multiply(ua, sa));
+    var sb = between(b1, b2, p);
+    if (sb >= 0 && sb <= 1) {
+      return p;
+    }
+  }
+  
+  return false; 
+}
+
 // Check for intersection of two line segments (x1, x2) and (x3, x4)
 // In general, the intersection of two line segments is
 //    1.  Nowhere
@@ -115,8 +161,7 @@ function intersection(x1, x2, x3, x4) {
     return lerp(x3, x4, s1);
   }
 
-  var res = {p: lerp(x3, x4, s1), q: lerp(x3, x4, s2)};
-  return res;
+  return {p: lerp(x3, x4, s1), q: lerp(x3, x4, s2)};
 }
 
 function colinear(x1, x2, x3) {
@@ -125,6 +170,12 @@ function colinear(x1, x2, x3) {
 
 function parallel(x1, x2, x3, x4) {
   return cross(subtract(x1, x2), subtract(x3, x4)) == 0;
+}
+
+function distance(p, q) {
+  var dx = p.x - q.x;
+  var dy = p.y - q.y;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 Point.prototype.onLineSegment = function(a, b) {
@@ -136,6 +187,15 @@ Point.prototype.onLineSegment = function(a, b) {
   }
   return false;
 }
+
+Point.prototype.equals = function(p) {
+  return (p.x == this.x && p.y == this.y); 
+}
+
+Point.prototype.onRay = function(a, b) {
+  return (colinear(a, b, this) && between(a, b, this) >= 0);
+}
+
 
 function lerp(a, b, t) {
   return new Point(a.x + t * (b.x - a.x), a.y + t * (b.y - a.y));

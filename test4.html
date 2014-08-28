@@ -13,50 +13,58 @@ init(ctx);
 setInterval(redraw, 100);
 var width = canvas.width;
 var height = canvas.height;
-var a1 = new Point(100, height);
-var a2 = new Point(width, height / 4);
+var a1 = new Point(100, 1.0 * height);
+var a2 = new Point(1.0 * width, height / 4);
 var b1 = new Point(10, 100);
 var c1 = new Point(0, 0);
 var c2 = new Point(0, 0);
 var e = new Point(0, 0);
-
+var poly = new Polygon(
+  [a1, a2, new Point(a2.x, a1.y)],
+  [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
 var n1 = 1;
 var n2 = 2 * n1;
 
 var o = multiply(add(a1, a2), 0.5);
+var mouse = new Point(b1.x, b1.y);
+
+var showInterceptBasis = false;
 
 canvas.addEventListener('mousemove', function(evt) {
   var rect = canvas.getBoundingClientRect();
   var x = evt.clientX;
   var y = evt.clientY;
+  mouse.x = x;
+  mouse.y = y;
   if (y) {
     b1.x = x;
     b1.y = y;
-    
+    var snell = n2 / n1; 
+    if (!poly.contains(mouse)) {
+      snell = n1 / n2;
+    }
     if (o) {
       var b = basis(a2, o);
-      c1 = add(multiply(rebase(new Point(1, 0), b), 100), o);
-      c2 = add(multiply(rebase(new Point(0, 1), b), 100), o);
       var u = rebase(subtract(o, b1), b); 
-      var c = new Point(u.x, u.y * (n1 / n2));
-      e = rescale(add(rebase(c, b), o), o, 300);
+      var c = new Point(u.x, u.y * snell);
+      e = rescale(add(rebase(c, b), o), o, canvas.width * canvas.height);
+      if (showInterceptBasis) {
+        c1 = add(multiply(rebase(new Point(1, 0), b), 100), o);
+        c2 = add(multiply(rebase(new Point(0, 1), b), 100), o);
+      }
     }
   }
 });
 
 function redraw() {
-  if (above(b1, o, a2)) {
-    clear(250);
-  } else {
-    clear(100, 100, 0);
-  }
+  clear(250);
   stroke(0);
-  line(a1, a2);
+  poly.draw();
   stroke(100);
   line(b1, o);
   stroke(200);
   line(o, e);
-  if (o) {
+  if (showInterceptBasis) {
     stroke(200, 0, 0);
     line(o, c1);
     stroke(0, 200, 0);

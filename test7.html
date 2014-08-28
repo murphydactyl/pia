@@ -1,0 +1,255 @@
+<html>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+
+<body>
+<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+init(ctx);
+setInterval(redraw, 33);
+
+var animations = [];
+
+var a = new Point(0, 25);
+var b = new Point(0, 75);
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(25, 25),
+  d: new Point(75, 25),
+  velocity: new Point(1, 0),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(25, 50),
+  d: new Point(75, 50),
+  velocity: new Point(1, 0),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(25, 75),
+  d: new Point(75, 75),
+  velocity: new Point(1, 0),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(50, 50),
+  d: new Point(50, 75),
+  velocity: new Point(1, 0),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(50, 25),
+  d: new Point(50, 75),
+  velocity: new Point(1, 0),
+});
+
+// Second Row
+var a = new Point(25, 25);
+var b = new Point(75, 25);
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(25, 25),
+  d: new Point(25, 75),
+  velocity: new Point(0, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: b,
+  b: a,
+  c: new Point(50, 25),
+  d: new Point(50, 75),
+  velocity: new Point(0, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(75, 25),
+  d: new Point(75, 75),
+  velocity: new Point(0, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(20, 50),
+  d: new Point(80, 50),
+  velocity: new Point(0, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: a,
+  b: b,
+  c: new Point(40, 50),
+  d: new Point(70, 50),
+  velocity: new Point(0, 1),
+});
+
+// Third row.
+animations[animations.length] = new Animation(
+{
+  a: new Point(20, 80),
+  b: new Point(40, 60),
+  c: new Point(45, 55),
+  d: new Point(75, 25),
+  velocity: new Point(1, -1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(50, 10),
+  b: new Point(50, 25),
+  c: new Point(50, 25),
+  d: new Point(50, 75),
+  velocity: new Point(0, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(0, 50),
+  b: new Point(20, 50),
+  c: new Point(25, 50),
+  d: new Point(75, 50),
+  velocity: new Point(1, 0),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(0, 0),
+  b: new Point(15, 15),
+  c: new Point(25, 25),
+  d: new Point(75, 75),
+  velocity: new Point(1, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(0, 50),
+  b: new Point(10, 50),
+  c: new Point(25, 50),
+  d: new Point(75, 50),
+  velocity: new Point(1, 0),
+});
+
+// Fourth row.
+animations[animations.length] = new Animation(
+{
+  a: new Point(22, 82),
+  b: new Point(42, 62),
+  c: new Point(45, 55),
+  d: new Point(75, 25),
+  velocity: new Point(1, -1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(47, 10),
+  b: new Point(47, 25),
+  c: new Point(50, 25),
+  d: new Point(50, 75),
+  velocity: new Point(0, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(0, 52),
+  b: new Point(20, 52),
+  c: new Point(25, 50),
+  d: new Point(75, 50),
+  velocity: new Point(1, 0),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(2, 0),
+  b: new Point(17, 15),
+  c: new Point(25, 25),
+  d: new Point(75, 75),
+  velocity: new Point(1, 1),
+});
+
+animations[animations.length] = new Animation(
+{
+  a: new Point(30, 15),
+  b: new Point(35, 15),
+  c: new Point(25, 25),
+  d: new Point(75, 75),
+  velocity: new Point(1, 1),
+});
+
+function Animation(params) {
+  var a = params.a;
+  var b = params.b;
+  var c = params.c;
+  var d = params.d;
+  var velocity = params.velocity;
+  this.update = function()
+  {
+    stroke(255, 0, 0);
+    line(a,b);
+    circle(a.x, a.y, 3);
+    stroke(0);
+    line(c,d);
+    x = intersectionRayLine(a, b, c, d);
+    if (x) {
+      ctx.strokeStyle = 'rgb(0, 255, 0)';
+      if (x.p) {
+        line(x.p, x.q);
+        circle(x.p.x, x.p.y, 3);
+        circle(x.q.x, x.q.y, 3);
+      } else {
+        circle(x.x, x.y, 3);
+      } 
+    }
+    a = add(a, velocity);
+    b = add(b, velocity);
+    if (a.x > 100 || a.y > 100 || a.x < 0 || a.y < 0 ||
+        b.x > 100 || b.y > 100 || b.x < 0 || b.y < 0) {
+      velocity = multiply(velocity, -1);
+    }
+  }
+}
+
+var cols = 5;
+
+function redraw() {
+  clear();
+  var i = 0;
+  for (var row = 0; row < animations.length / cols; row++) {
+    for (var col = 0; col < cols; col++) {
+      ctx.setTransform(1, 0, 0, 1, col * 125, row * 125);
+      animations[i].update();
+      i++;
+      if (i >= animations.length) break;
+    }
+  }
+}
+
+</script>
+</body>
+</html>

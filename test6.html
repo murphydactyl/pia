@@ -1,0 +1,50 @@
+<html>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+
+<body>
+<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+init(ctx);
+setInterval(redraw, 100);
+
+var a = new Point(100, 100);
+var b = new Point(canvas.width - 100, 100);
+
+var objects = [];
+
+objects[objects.length] = new Square(canvas.width / 2, canvas.height / 2, 40);
+objects[objects.length] = new Circle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
+
+var mouse = new Point(0, 0);
+canvas.addEventListener('mousemove', function(evt) {
+  var rect = canvas.getBoundingClientRect();
+  var x = evt.clientX;
+  var y = evt.clientY;
+  mouse.x = x;
+  mouse.y = y;
+});
+
+function redraw() {
+  clear();
+  for (oo = 0; oo < objects.length; oo++) {
+    var o = objects[oo];
+    if (o.contains(mouse)) {
+      stroke(0, 255, 0);
+    } else {
+      //o.jiggle(10, 10);
+      stroke(0);
+    }
+    o.draw();
+    stroke(200);
+    circle(mouse.x, mouse.y, 3);
+  }
+}
+
+</script>
+</body>
+</html>

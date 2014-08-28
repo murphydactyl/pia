@@ -1,8 +1,13 @@
 // Polygon functions
 
-function Polygon() {
-  this.vertices = [new Point(0, 0), new Point(1, 0)];
-  this.edges = [0, 1];
+function Polygon(verts, edges) {
+  if (arguments.length < 2) {
+    this.vertices = [new Point(0, 0), new Point(1, 0)];
+    this.edges = [{p: 0, q: 1}];
+  } else {
+    this.vertices = verts;
+    this.edges = edges;
+  }
 }
 
 Polygon.prototype.intersectionOf = function(a, b) {
@@ -23,7 +28,7 @@ Polygon.prototype.numEdges = function() {
 }
 
 Polygon.prototype.numVerts = function() {
-  return this.verts.length;
+  return this.vertices.length;
 }
 
 Polygon.prototype.edge = function(i) {
@@ -47,6 +52,52 @@ Polygon.prototype.rotate = function(radians) {
   for (i = 0; i < this.vertices.length; i++) {
     var p = this.vertices[i];
     this.vertices[i] = new Point(p.x + cos - p.y * sin, p.x * sin + p.y * cos);
+  }
+}
+
+Polygon.prototype.aabb = function() {
+  var p = new Point(this.vertices[0].x, this.vertices[0].y);
+  var q = new Point(p.x, p.y);
+  for (var i = 0; i < this.numVerts(); i++) {
+    var v = this.vertices[i];
+    if (v.x < p.x) {
+      p.x = v.x;
+    }
+    if (v.x > q.x) {
+      q.x = v.x;
+    }
+    if (v.y < p.y) {
+      p.y = v.y;
+    }
+    if (v.y > q.y) {
+      q.y = v.y;
+    }
+  }
+  return {p: p, q: q}; 
+}
+
+// Detect when a point is inside the polygon.
+// A ray from the point towards any point on the polygon boundary intersects
+// the boundary an odd number of times if and only if the point is inside
+// the polygon.
+// TODO(steinm): Fix the hack which offsets q by 10 pixels, which is needed
+// to prevent double-counting corners when the AABB shares a real vertex
+// with the underlying polygon.
+Polygon.prototype.contains = function(p) {
+  var q = this.aabb().q;
+  q.x += 1000;
+  var intersections = this.intersectionOf(p, q);
+  var count = 0; 
+  if (intersections) {
+    count = intersections.length;
+  }
+  return count % 2 == 1;
+}
+
+Polygon.prototype.jiggle = function(h, v) {
+  for (var i = 0; i < this.numVerts(); i++) {
+    this.vertices[i].x += (Math.random() - 0.5) * h;
+    this.vertices[i].y += (Math.random() - 0.5) * v;
   }
 }
 
