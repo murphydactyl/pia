@@ -19,7 +19,84 @@ Polygon.prototype.intersectionOf = function(a, b) {
       res[res.length] = x;
     }
   }
-  if (res.length == 0) { return undefined; }
+  if (res.length == 0) return false;
+  return res;
+}
+
+Polygon.prototype.intersectionOfRay = function(a, b) {
+  var res = [];
+  for (var i = 0; i < this.numEdges(); i++) {
+    var e = this.edge(i);
+    var x = intersectionRayLine(a, b, e.p, e.q);
+    if (x) {
+      res[res.length] = x;
+    }
+  }
+  if (res.length == 0) return false;
+  return res;
+}
+
+Polygon.prototype.traceRay = function(o, p, n1, n2) {
+  // Assume ray is outside
+  var x = this.firstIntersectionOfRay(o, p);
+  var path = [new Point(o.x, o.y)];
+  while (x) {
+    path[path.length] = new Point(x.x, x.y); 
+    p = add(x, multiply(snell(x, x.e.p, p, n2), 10));
+    o = x;
+    x = this.firstIntersectionOfRay(o, p);
+  }
+  path[path.length] = new Point(p.x, p.y);
+  if (path.length > 2) {
+    return path;
+  }
+  return false; 
+}
+
+
+Polygon.prototype.ptOnBoundary = function(p) {
+  for (var i = 0; i < this.numEdges(); i++) {
+    if (p.onLineSegment(this.edge(i))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Polygon.prototype.firstIntersectionOfRay = function(a, b) {
+  var res = false;
+  
+  var d0 = distance(this.vertices[0], a);
+  for (var i = 0; i < this.numEdges(); i++) {
+    var e = this.edge(i);
+    var x = intersectionRayLine(a, b, e.p, e.q);
+    if (x) {
+      if (x.x) {
+        var d1 = distance(x, a);
+        if (d1 < d0) {
+          res = x;
+          res.i = i;
+          res.e = e;
+          d0 = d1; 
+        }
+      } else {
+        var d1 = distance(x.p, a);
+        var d2 = distance(x.q, a);
+        if (d1 < d0) {
+          res = x.p;
+          res.i = i;
+          res.e = e;
+          d0 = d1;
+        }
+        if (d2 < d0) {
+          res = x.q;
+          res.i = i;
+          res.e = e;
+          d0 = d2;
+        }
+      }
+    }
+  }
   return res;
 }
 

@@ -1,5 +1,3 @@
-// point.js
-
 function Point(x,y) {
   this.x = x;
   this.y = y;
@@ -58,6 +56,9 @@ function rescale(p, o, d) {
 function unit(p, o) {
   var v = subtract(p, o);
   var s = Math.sqrt(dot(v, v));
+  if (s == 0) {
+    console.log("Uh-oh, unit vector has length 0.");
+  }
   return new Point(v.x / s, v.y / s);
 }
 
@@ -73,6 +74,22 @@ function rebase(p, b) {
   return new Point(x, y); 
 }
 
+function firstIntersectionRayPolygons(a1, a2, objects) {
+  var d0 = Infinity;
+  var res = false;
+  for (var i = 0; i < objects.length; i++) {
+    var pt = objects[i].firstIntersectionOfRay(a1, a2);
+    if (pt) {
+      var d = distance(pt, a1);
+      if (d < d0) {
+        res = new Point(pt.x, pt.y);
+        d0 = d;
+      }
+    }
+  }
+  return res;
+}
+
 // Check for intersection of a ray (x1, x2) with line segment (x3, x4).
 function intersectionRayLine(a1, a2, b1, b2) {
   var ua = subtract(a2, a1); 
@@ -86,6 +103,9 @@ function intersectionRayLine(a1, a2, b1, b2) {
     // Ray and segment are colinear.
     var sb = between(b1, b2, a1);
     var p = add(b1, multiply(ub, sb));
+    if (isNaN(p.x) || isNaN(p.y)) {
+      console.log("NaN!");
+    }
     if (!b1.onRay(a1, a2)) {
       b1 = false; 
     }
@@ -173,9 +193,22 @@ function parallel(x1, x2, x3, x4) {
 }
 
 function distance(p, q) {
+  if (p === undefined) {
+    console.log('I caught p is undefined.');
+  }
   var dx = p.x - q.x;
   var dy = p.y - q.y;
   return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Compute the output ray after applying snell's law.
+// Input ray is from point b to point o
+// Edge is from o to a.
+// Output ray emanates from o.
+function snell(o, a, b, index) {
+  var v = basis(a, o);
+  var u = rebase(subtract(o, b), v); 
+  return rebase(new Point(u.x, u.y * index), v);
 }
 
 Point.prototype.onLineSegment = function(a, b) {

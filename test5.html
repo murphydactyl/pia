@@ -12,15 +12,23 @@ var ctx = canvas.getContext("2d");
 init(ctx);
 setInterval(redraw, 100);
 
-var a = new Point(100, 100);
-var b = new Point(canvas.width - 100, 100);
+var width = canvas.width;
+var height = canvas.height;
+
+var a1 = new Point(.1 * width + 1, .8 * height);
+var a2 = new Point(.8 * width, .1 * width);
+var a3 = new Point(a2.x, a1.y);
 
 var objects = [];
 
+objects[objects.length] = new Polygon(
+  [a1, a2, a3],
+  [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
 objects[objects.length] = new Square(canvas.width / 2, canvas.height / 2, 40);
 objects[objects.length] = new Circle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
 
-objects[0].rotate(1);
+var a = new Point(100, 100);
+var b = new Point(canvas.width - 100, 200);
 
 canvas.addEventListener('mousemove', function(evt) {
   var rect = canvas.getBoundingClientRect();
@@ -28,23 +36,29 @@ canvas.addEventListener('mousemove', function(evt) {
   var y = evt.clientY;
   if (y) {
     a = new Point(a.x, y);
-    b = new Point(b.x, y);
+    b = new Point(b.x, y + 100 * (x / width - 0.5));
   }
 });
 
 function redraw() {
   clear();
+  stroke(0);
   line(a, b);
-  for (oo = 0; oo < objects.length; oo++) {
-    var o = objects[oo];
+  for (var i = 0; i < objects.length; i++) {
+    var o = objects[i];
+    var allx = o.intersectionOf(a, b);
+    if (allx) {
+      stroke(0, 255, 0);
+    } else {
+      stroke(255, 0, 0);
+    }
     o.draw();
-    var intersections = o.intersectionOf(a, b);
-    if (intersections) {
+    if (allx) {
       var aabb = o.aabb();
       stroke(200);
       rect(aabb.p.x, aabb.p.y, aabb.q.x - aabb.p.x, aabb.q.y - aabb.p.y);
-      for (var i = 0; i < intersections.length; i++) {
-        var x = intersections[i];
+      for (var j = 0; j < allx.length; j++) {
+        var x = allx[j];
         stroke(0, 255, 0); 
         if (x.x) {
           circle(x.x, x.y, 3);

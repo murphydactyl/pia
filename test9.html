@@ -1,0 +1,65 @@
+<html>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+
+<body>
+<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+init(ctx);
+setInterval(redraw, 100);
+var width = canvas.width;
+var height = canvas.height;
+var a1 = new Point(.1 * width, .8 * height);
+var a2 = new Point(.8 * width, .1 * width);
+var a3 = new Point(a2.x, a1.y);
+var o = new Point(10, 10);
+var poly = new Polygon(
+  [a1, a2, a3],
+  [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
+var n1 = 1;
+var n2 = 2 * n1;
+
+var mouse = new Point(0, 0);
+
+var showInterceptBasis = false;
+var path;
+
+canvas.addEventListener('mousemove', function(evt) {
+  var rect = canvas.getBoundingClientRect();
+  var x = evt.clientX;
+  var y = evt.clientY;
+  mouse.x = x;
+  mouse.y = y;
+  if (y) {
+    path = poly.traceRay(o, mouse, n1, n2); 
+  } else {
+    path = false;
+  }
+});
+
+function redraw() {
+  clear(250);
+  stroke(255, 0, 0);
+  poly.draw();
+  stroke(100);
+  line(o, mouse);
+  if (path) {
+    stroke(200);
+    for (var i = 1; i < path.length; i++) {
+      var p = path[i];
+      var q = path[i-1];
+      line(p, q);
+    }
+  }
+  fill(100);
+  text('n1 = 1', 10, 40);
+  text('n2 = ' + Math.round(10 * n2) / 10, canvas.width / 2 + 10, 40);
+}
+
+</script>
+</body>
+</html>
