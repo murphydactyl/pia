@@ -24,41 +24,49 @@ var b = new Point(a.x, a.y);
 
 var objects = [];
 
+objects[objects.length] = new Circle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
 objects[objects.length] = new Polygon(
   [a1, a2, a3],
   [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
 objects[objects.length] = new Square(canvas.width / 2, canvas.height / 2, 40);
-objects[objects.length] = new Circle(canvas.width / 2, canvas.height / 2, canvas.width / 4);
+
+a = new Point(1, 327);
+b = new Point(100, 339);
 
 canvas.addEventListener('mousemove', function(evt) {
   var rect = canvas.getBoundingClientRect();
   var x = evt.clientX;
   var y = evt.clientY;
-  b = new Point(a.x + 100, y);
+  b = new Point(a.x + 10, y);
   var angle = 4 * Math.PI * (y / height - 0.5);
   a = new Point(Math.sin(angle), y);
   if (x) {
     b = rotate(b, a, (x / canvas.width - 0.5) * Math.PI);
   }
+  //console.log(a + " " + b);
 });
 
 function redraw() {
-  var x = firstIntersectionRayPolygons(a, b, objects);
   clear();
   stroke(255, 0, 0);
   circle(a.x, a.y, 3);
+  stroke(255, 0, 0);
+  stroke(0);
   line(a, b);
-  var d = Infinity;
   for (var i = 0; i < objects.length; i++) {
     var o = objects[i];
     stroke(0);
     o.draw();
   }
-  if (x) {
-    stroke(200);
-    stroke(0, 255, 0); 
-    if (x.x) {
-      circle(x.x, x.y, 3);
+  var ret = firstIntersectionRayPolygons(a, b, objects);
+  if (ret) {
+    for (var i = 0; i < ret.candidates.length; i++) {
+      if (i == ret.index) {
+        stroke(0, 255, 0);
+      } else {
+        stroke(255, 0, 0);
+      }
+      circle(ret.candidates[i].x, ret.candidates[i].y, 4);
     }
   }
 }

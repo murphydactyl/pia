@@ -36,7 +36,8 @@ canvas.addEventListener('mousemove', function(evt) {
   var y = evt.clientY;
   if (y) {
     a = new Point(a.x, y);
-    b = new Point(b.x, y + 100 * (x / width - 0.5));
+    b = new Point(canvas.width - a.x, a.y);
+    b = rotate(b, multiply(add(a, b), 0.5), 2 * Math.PI * (x / width - 0.5));
   }
 });
 

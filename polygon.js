@@ -16,7 +16,7 @@ Polygon.prototype.intersectionOf = function(a, b) {
     var e = this.edge(i);
     var x = intersection(e.p, e.q, a, b);
     if (x) {
-      res[res.length] = x;
+      res = res.concat(x);
     }
   }
   if (res.length == 0) return false;
@@ -29,7 +29,7 @@ Polygon.prototype.intersectionOfRay = function(a, b) {
     var e = this.edge(i);
     var x = intersectionRayLine(a, b, e.p, e.q);
     if (x) {
-      res[res.length] = x;
+      res = res.concat(x);
     }
   }
   if (res.length == 0) return false;
@@ -64,40 +64,23 @@ Polygon.prototype.ptOnBoundary = function(p) {
 }
 
 Polygon.prototype.firstIntersectionOfRay = function(a, b) {
-  var res = false;
-  
-  var d0 = distance(this.vertices[0], a);
-  for (var i = 0; i < this.numEdges(); i++) {
-    var e = this.edge(i);
-    var x = intersectionRayLine(a, b, e.p, e.q);
-    if (x) {
-      if (x.x) {
-        var d1 = distance(x, a);
-        if (d1 < d0) {
-          res = x;
-          res.i = i;
-          res.e = e;
-          d0 = d1; 
-        }
-      } else {
-        var d1 = distance(x.p, a);
-        var d2 = distance(x.q, a);
-        if (d1 < d0) {
-          res = x.p;
-          res.i = i;
-          res.e = e;
-          d0 = d1;
-        }
-        if (d2 < d0) {
-          res = x.q;
-          res.i = i;
-          res.e = e;
-          d0 = d2;
-        }
-      }
+  var all = this.intersectionOfRay(a, b);
+  if (!all) {
+    return false;
+  }
+  var d0 = Infinity
+  var index = -1;
+  for (var i = 0; i < all.length; i++) {
+    var d = distance(all[i], a);
+    if (d < d0) {
+      d0 = d;
+      index = i;
     }
   }
-  return res;
+  if (index >= 0) {
+    return all[index];
+  }
+  return false;
 }
 
 Polygon.prototype.numEdges = function() {

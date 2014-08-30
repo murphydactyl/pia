@@ -74,20 +74,51 @@ function rebase(p, b) {
   return new Point(x, y); 
 }
 
-function firstIntersectionRayPolygons(a1, a2, objects) {
-  var d0 = Infinity;
-  var res = false;
+function firstIntersectionLineSegmentPolygons(a1, a2, objects) {
+  var candidates = [];
   for (var i = 0; i < objects.length; i++) {
-    var pt = objects[i].firstIntersectionOfRay(a1, a2);
-    if (pt) {
-      var d = distance(pt, a1);
-      if (d < d0) {
-        res = new Point(pt.x, pt.y);
-        d0 = d;
-      }
+    var x = objects[i].intersectionOf(a1, a2);
+    if (x) {
+      candidates = candidates.concat(x);
     }
   }
-  return res;
+  var d0 = Infinity;
+  var index = -1;
+  for (var i = 0; i < candidates.length; i++) {
+    var d = distance(candidates[i], a1);
+    if (d < d0) {
+      index = i;
+      d0 = d;
+    }
+  }
+  if (index >= 0) {
+    return {candidates: candidates, index: index};
+  }
+  console.log("index is false, candidates.length = " + candidates.length);
+  return false;
+}
+
+function firstIntersectionRayPolygons(a1, a2, objects) {
+  var candidates = [];
+  for (var i = 0; i < objects.length; i++) {
+    var x = objects[i].intersectionOfRay(a1, a2);
+    if (x) {
+      candidates = candidates.concat(x);
+    }
+  }
+  var d0 = Infinity;
+  var index = -1;
+  for (var i = 0; i < candidates.length; i++) {
+    var d = distance(candidates[i], a1);
+    if (d < d0) {
+      index = i;
+      d0 = d;
+    }
+  }
+  if (index >= 0) {
+    return {candidates: candidates, index: index};
+  }
+  return false;
 }
 
 // Check for intersection of a ray (x1, x2) with line segment (x3, x4).
@@ -114,19 +145,19 @@ function intersectionRayLine(a1, a2, b1, b2) {
     }
     if (sb >= 0 && sb <= 1) {
       if (b1 && !b1.equals(p)) {
-        return {p: p, q: b1};
+        return [p, b1];
       } else if (b2) {
-        return {p: p, q: b2};
+        return [p, b2];
       }
-      return p;
+      return [p];
     }
     if (b1) {
       if (b2 && !b2.equals(b1)) {
-        return {p: b1, q: b2};
+        return [b1, b2]
       }
-      return b1;
+      return [b1];
    } else if (b2) {
-     return b2;
+     return [b2];
    } 
    return false;
   }
@@ -136,10 +167,9 @@ function intersectionRayLine(a1, a2, b1, b2) {
     var p = add(a1, multiply(ua, sa));
     var sb = between(b1, b2, p);
     if (sb >= 0 && sb <= 1) {
-      return p;
+      return [p];
     }
   }
-  
   return false; 
 }
 
@@ -181,7 +211,7 @@ function intersection(x1, x2, x3, x4) {
     return lerp(x3, x4, s1);
   }
 
-  return {p: lerp(x3, x4, s1), q: lerp(x3, x4, s2)};
+  return [lerp(x3, x4, s1), lerp(x3, x4, s2)];
 }
 
 function colinear(x1, x2, x3) {
@@ -198,7 +228,12 @@ function distance(p, q) {
   }
   var dx = p.x - q.x;
   var dy = p.y - q.y;
-  return Math.sqrt(dx * dx + dy * dy);
+  var d = Math.sqrt(dx * dx + dy * dy);
+  if (isNaN(d)) {
+    console.log("NaN: " + p + " " + q);
+    return Infinity;
+  }
+  return d;
 }
 
 // Compute the output ray after applying snell's law.
