@@ -8,42 +8,50 @@
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-
 init(ctx);
 setInterval(redraw, 100);
 
-var a = new Point(canvas.width / 2, canvas.height / 2);
+var o = new Point(canvas.width / 2, canvas.height / 2);
 var b = new Point(10, canvas.height / 2);
-var c = new Point(a.x, canvas.width);
+var c = new Point(o.x, canvas.width);
 var n1 = 1;
-var n2 = 2 * n1;
-
+var n2 = 2;
+var index = n1 / n2;
 canvas.addEventListener('mousemove', function(evt) {
   var rect = canvas.getBoundingClientRect();
   var x = evt.clientX;
   var y = evt.clientY;
   if (y) {
     b.y = y;
-    n2 = 10 * x / canvas.width;
-    var u = subtract(a, b);
-    c.y = a.y + u.y * (n1 / n2);
-    c.x = a.x + u.x;
+    b.x = x;
+    if (x > o.x) {
+      index = n2 / n1;
+    } else {
+      index = n1 / n2;
+    }
+    var e = new Point(o.x, o.y + 1);
+    c = add(o, multiply(snell(o, e, b, index), 100));
   }
 });
 
 function redraw() {
   clear();
   fill(240);
-  fillRect(canvas.width / 2, 0, canvas.width / 2, canvas.height);
-  stroke(0);
-  line(a, b);
-  line(a, c);
-  line(new Point(canvas.width / 2, 0), new Point(canvas.width / 2, canvas.height));
+  if (n1 < n2) {
+    fillRect(canvas.width / 2, 0, canvas.width / 2, canvas.height);
+  } else {
+    fillRect(0, 0, canvas.width / 2, canvas.height);
+  }
   stroke(200);
   line(new Point(0, canvas.height / 2), new Point(canvas.width, canvas.height / 2));
+  stroke(100);
+  line(new Point(canvas.width / 2, 0), new Point(canvas.width / 2, canvas.height));
+  stroke(255, 0, 0);
+  line(o, lerp(b, o, -width));
+  line(o, lerp(o, c, width));
   fill(100);
-  text('n1 = 1', 10, 40);
-  text('n2 = ' + Math.round(10 * n2) / 10, canvas.width / 2 + 10, 40);
+  text('n1 = ' + n1, 10, 40);
+  text('n2 = ' + n2, canvas.width / 2 + 10, 40);
 }
 
 </script>

@@ -29,30 +29,48 @@ Polygon.prototype.intersectionOfRay = function(a, b) {
     var e = this.edge(i);
     var x = intersectionRayLine(a, b, e.p, e.q);
     if (x) {
+      if (x instanceof Point) {
+        x.i = i;
+      } else {
+        x[0].i = i;
+        x[1].i = i;
+      }
       res = res.concat(x);
     }
+
   }
   if (res.length == 0) return false;
   return res;
 }
 
-Polygon.prototype.traceRay = function(o, p, n1, n2) {
+Polygon.prototype.traceRayOnce = function(p, q, index) {
   // Assume ray is outside
-  var x = this.firstIntersectionOfRay(o, p);
-  var path = [new Point(o.x, o.y)];
-  while (x) {
-    path[path.length] = new Point(x.x, x.y); 
-    p = add(x, multiply(snell(x, x.e.p, p, n2), 10));
-    o = x;
-    x = this.firstIntersectionOfRay(o, p);
-  }
-  path[path.length] = new Point(p.x, p.y);
-  if (path.length > 2) {
-    return path;
+  var enter = poly.firstIntersectionOfRay(p, q);
+  if (enter) {
+    var e = this.edge(enter.i).p;
+    var exit = snell(enter, e, p, index);
+    return {enter: enter, exit: exit};
   }
   return false; 
 }
 
+Polygon.prototype.traceRayFromOutside = function(p, q, index) {
+  var ray1 = this.traceRayOnce(p, q, index);
+  if (!ray1) return false;
+  var p2 = ray1.enter;
+  var q2 = add(p2, ray1.exit);
+  var ray2 = this.traceRayOnce(lerp(p2, q2, 1e-6), q2, 1 / index);
+  var p3 = ray2.enter;
+  var q3 = rescale(add(p3, ray2.exit), p3, 100);
+  return [p, p2, p3, q3]; 
+}
+
+Polygon.prototype.traceRayFromInside = function(p, q, index) {
+  var ray1 = this.traceRayOnce(p, q, index);
+  var p2 = ray1.enter;
+  var q2 = rescale(add(p2, ray1.exit), p2, 100);
+  return [p, p2, q2]; 
+}
 
 Polygon.prototype.ptOnBoundary = function(p) {
   for (var i = 0; i < this.numEdges(); i++) {

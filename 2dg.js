@@ -4,6 +4,8 @@ var ctx;
 function init(context) {
   ctx = context;
   ctx.font = '24pt Calibri';
+  width = ctx.canvas.width;
+  height = ctx.canvas.height;
 }
 
 function line(x0,y0,x1,y1) {

@@ -17,34 +17,46 @@ var a = new Point(100, .8 * height);
 var b = new Point(.8 * width, 100);
 var c = new Point(b.x, a.y);
 var e = new Point(0, 0);
-var p = new Point(0, 0);
-var q = new Point(100, 0); 
 var poly = new Polygon(
   [a, b, c],
   [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
+poly = new Square(width / 2, height / 2, width / 4, 5);
 var n1 = 1;
-var n2 = 2 * n1;
+var n2 = 2;
 
-var o;
-var mouse = new Point(b.x, b.y);
+var mouse = new Point(141,248);
+var mouseStart = new Point(0, 0);
+var dir = new Point(10, -1);
+var path = [];
+var p;
+var q;
 
+canvas.addEventListener('mousedown', function(evt) {
+  var x = evt.clientX;
+  var y = evt.clientY;
+  mouseStart.x = x;
+  mouseStart.y = y;
+});
 
 canvas.addEventListener('mousemove', function(evt) {
   var rect = canvas.getBoundingClientRect();
   var x = evt.clientX;
   var y = evt.clientY;
+
   mouse.x = x;
   mouse.y = y;
+  p = mouseStart;
+  q = mouse;
   if (y) {
-    p = mouse;
-    q = add(mouse, new Point(1, 12));
-    o = poly.firstIntersectionOfRay(p, q);
-    if (o) {
-      var index = n1 / n2; 
-      if (poly.contains(p)) {
-        index = n2 / n1;
-      }
-      e = rescale(add(snell(o, a, p, index), o), o, width * height);
+    if (!poly.contains(p)) {
+      var index = n1 / n2;
+      path = poly.traceRayFromOutside(p, q, index);
+    } else {
+      var index = n2 / n1;
+      path = poly.traceRayFromInside(p, q, index);
+    }
+    if (!path) {
+      path = [p, q];
     }
   }
 });
@@ -54,20 +66,15 @@ function redraw() {
   stroke(0);
   poly.draw();
   stroke(255, 0, 0);
-  circle(p.x, p.y, 3);
-  stroke(100);
-  if (o) {
-    circle(o.x, o.y, 3);
-    stroke(200);
-    line(p, o);
-    line(o, e);
-  } else {
-    stroke(0);
-    line(p, q);
+  for (var i = 0; i < path.length - 1; i = i + 1) {
+    var p = path[i];
+    var q = path[i + 1];
+    circle(p.x, p.y, 3);
+    line(p, q); 
   }
   fill(100);
   text('n1 = 1', 10, 40);
-  text('n2 = ' + Math.round(10 * n2) / 10, canvas.width / 2 + 10, 40);
+  text('n2 = ' + n2, canvas.width / 2 + 10, 40);
 }
 
 </script>

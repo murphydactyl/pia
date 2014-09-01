@@ -215,10 +215,10 @@ function Animation(params) {
     x = intersection(a, b, c, d);
     if (x) {
       ctx.strokeStyle = 'rgb(0, 255, 0)';
-      if (x.p) {
-        line(x.p, x.q);
-        circle(x.p.x, x.p.y, 3);
-        circle(x.q.x, x.q.y, 3);
+      if (x instanceof Array) {
+        line(x[0], x[1]);
+        circle(x[0].x, x[0].y, 3);
+        circle(x[1].x, x[1].y, 3);
       } else {
         circle(x.x, x.y, 3);
       } 

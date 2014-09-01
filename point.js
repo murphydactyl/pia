@@ -54,10 +54,16 @@ function rescale(p, o, d) {
 }
 
 function unit(p, o) {
-  var v = subtract(p, o);
+  var v;
+  if (arguments.length == 1) {
+    v = p;
+  } else {
+    v = subtract(p, o);
+  }
   var s = Math.sqrt(dot(v, v));
   if (s == 0) {
     console.log("Uh-oh, unit vector has length 0.");
+    return new Point(Infinity, Infinity);
   }
   return new Point(v.x / s, v.y / s);
 }
@@ -149,15 +155,15 @@ function intersectionRayLine(a1, a2, b1, b2) {
       } else if (b2) {
         return [p, b2];
       }
-      return [p];
+      return p;
     }
     if (b1) {
       if (b2 && !b2.equals(b1)) {
         return [b1, b2]
       }
-      return [b1];
+      return b1;
    } else if (b2) {
-     return [b2];
+     return b2;
    } 
    return false;
   }
@@ -167,7 +173,7 @@ function intersectionRayLine(a1, a2, b1, b2) {
     var p = add(a1, multiply(ua, sa));
     var sb = between(b1, b2, p);
     if (sb >= 0 && sb <= 1) {
-      return [p];
+      return p;
     }
   }
   return false; 
@@ -241,9 +247,18 @@ function distance(p, q) {
 // Edge is from o to a.
 // Output ray emanates from o.
 function snell(o, a, b, index) {
+  if (cross(subtract(b, o), subtract(a, o)) < 0) {
+    a = rescale(a, o, -1);
+  }
   var v = basis(a, o);
-  var u = rebase(subtract(o, b), v); 
-  return rebase(new Point(u.x, u.y * index), v);
+  var u = unit(o, b);
+  u = rebase(u, v);
+  var s = u.y * index; 
+  var c = 1 - s * s;
+  if (c < 0) {
+    return rebase(new Point(-u.x, u.y), v);
+  } 
+  return rebase(new Point(Math.sqrt(c), s), v);
 }
 
 Point.prototype.onLineSegment = function(a, b) {
