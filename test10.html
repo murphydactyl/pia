@@ -20,16 +20,15 @@ var e = new Point(0, 0);
 var poly = new Polygon(
   [a, b, c],
   [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
-poly = new Square(width / 2, height / 2, width / 4, 5);
+poly = new Circle(width / 2, height / 2, width / 4, 100);
 var n1 = 1;
 var n2 = 2;
 
 var mouse = new Point(141,248);
 var mouseStart = new Point(0, 0);
-var dir = new Point(10, -1);
 var path = [];
-var p;
-var q;
+var p = new Point(0, 0);
+var q = new Point(1, 0);
 
 canvas.addEventListener('mousedown', function(evt) {
   var x = evt.clientX;
@@ -47,13 +46,13 @@ canvas.addEventListener('mousemove', function(evt) {
   mouse.y = y;
   p = mouseStart;
   q = mouse;
-  if (y) {
+  if (p instanceof Point && q instanceof Point) {
     if (!poly.contains(p)) {
       var index = n1 / n2;
-      path = poly.traceRayFromOutside(p, q, index);
+      path = poly.traceRayFromOutside(p, q, index, 20);
     } else {
       var index = n2 / n1;
-      path = poly.traceRayFromInside(p, q, index);
+      path = poly.traceRayFromInside(p, q, index, 20);
     }
     if (!path) {
       path = [p, q];

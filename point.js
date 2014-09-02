@@ -13,6 +13,9 @@ function add(p, q) {
 
 // Subtract point q from p.
 function subtract(p, q) {
+  if (p === undefined || q === undefined) {
+    console.log('a');
+  }
   return new Point(p.x - q.x, p.y - q.y);
 }
 
@@ -26,7 +29,10 @@ function dot(p, q) {
 }
 
 function cross(p, q) {
-  return p.x * q.y - p.y * q.x;
+  if (p instanceof Point) {
+    return p.x * q.y - p.y * q.x;
+  }
+  console.log("ouch");
 }
 
 function crosses(x1, x2, x3, x4) {
