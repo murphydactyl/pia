@@ -226,8 +226,9 @@ function Lens(x, y, h, segments) {
     segments = 20;
   }
   var p = new Circle(x, y, h, segments);
+  var s = 0;
   for (var i = 0; i < p.numVerts(); i++) {
-    p.vertices[i].x = p.vertices[i].x < x + h / 3 ? x + h / 3 : p.vertices[i].x;
+    p.vertices[i].x = p.vertices[i].x < x + s ? x + s : p.vertices[i].x;
   }
   p.name = 'Lens';
   return p;

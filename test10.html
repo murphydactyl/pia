@@ -2,6 +2,8 @@
 <script src="point.js"></script>
 <script src="2dg.js"></script>
 <script src="polygon.js"></script>
+<script src="mousetrap.js"></script>
+<script src="jquery-1.11.1.js"></script>
 
 <body>
 <canvas id="canvas" width="1000" height="1000" style="border:1px solid #000000"></canvas>
@@ -29,19 +31,50 @@ var mouseStart = new Point(0, 0);
 var path = [];
 var p = new Point(0, 0);
 var q = new Point(1, 0);
+var dirty = true;
+Mousetrap.bind(['1'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 3);
+  dirty = true;}); 
+Mousetrap.bind(['2'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 4);
+  dirty = true;}); 
+Mousetrap.bind(['4'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 5);
+  dirty = true;});
+Mousetrap.bind(['5'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 6);
+  dirty = true;});
+Mousetrap.bind(['6'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 7);
+  dirty = true;});
+Mousetrap.bind(['7'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 8);
+  dirty = true;});
+Mousetrap.bind(['8'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 20);
+  dirty = true;});
+Mousetrap.bind(['9'], function(e) {
+  poly = new Circle(width / 2, height / 2, width / 3, 100);
+  dirty = true;}); 
+Mousetrap.bind(['0'], function(e) {
+  poly = new Lens(width / 2, height / 2, width / 3, 100);
+  dirty = true;});
+
 
 canvas.addEventListener('mousedown', function(evt) {
   var x = evt.clientX;
   var y = evt.clientY;
   mouseStart.x = x;
   mouseStart.y = y;
+  dirty = true;
 });
 
-canvas.addEventListener('mousemove', function(evt) {
-  var rect = canvas.getBoundingClientRect();
-  var x = evt.clientX;
-  var y = evt.clientY;
+$("#canvas").mousemove(function(evt) {
+  dirty = true;
+  update(evt.clientX, evt.clientY)
+});
 
+function update(x, y) {
   mouse.x = x;
   mouse.y = y;
   p = mouseStart;
@@ -58,9 +91,13 @@ canvas.addEventListener('mousemove', function(evt) {
       path = [p, q];
     }
   }
-});
+};
 
 function redraw() {
+  if (!dirty) {
+    return;
+  }
+  update(mouse.x, mouse.y);
   clear(250);
   stroke(0);
   poly.draw();
@@ -74,6 +111,7 @@ function redraw() {
   fill(100);
   text('n1 = 1', 10, 40);
   text('n2 = ' + n2, canvas.width / 2 + 10, 40);
+  dirty = false;
 }
 
 </script>
