@@ -59,7 +59,7 @@ Polygon.prototype.traceRayFromOutside = function(p, q, index) {
   if (!ray1) return false;
   var p2 = ray1.enter;
   var q2 = ray1.exit;
-  var ray2 = this.traceRayOnce(lerp(p2, q2, 1e-8), q2, 1 / index);
+  var ray2 = this.traceRayOnce(lerp(p2, q2, 1e-10), q2, 1 / index);
   var p3 = ray2.enter;
   var q3 = rescale(ray2.exit, p3, 1000);
   return [p, p2, p3, q3]; 
@@ -81,7 +81,7 @@ Polygon.prototype.traceRay = function(p, q, index, reps) {
     if (p.i) {
       var e = this.edge(p.i);
       if (p.onLineSegment(e.p, e.q)) {
-        p = lerp(p, q, 1e-8);
+        p = lerp(p, q, 1e-10);
       }
     }
     var ray = this.traceRayOnce(p, q, index);
