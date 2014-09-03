@@ -61,14 +61,14 @@ Polygon.prototype.traceRayFromOutside = function(p, q, index) {
   var q2 = ray1.exit;
   var ray2 = this.traceRayOnce(lerp(p2, q2, 1e-8), q2, 1 / index);
   var p3 = ray2.enter;
-  var q3 = rescale(ray2.exit, p3, 100);
+  var q3 = rescale(ray2.exit, p3, 1000);
   return [p, p2, p3, q3]; 
 }
 
 Polygon.prototype.traceRayFromInside = function(p, q, index) {
   var ray1 = this.traceRayOnce(p, q, index);
   var p2 = ray1.enter;
-  var q2 = rescale(ray1.exit, p2, 100);
+  var q2 = rescale(ray1.exit, p2, 1000);
   return [p, p2, q2]; 
 }
 
@@ -221,6 +221,18 @@ function Circle(ox, oy, radius, segments) {
   return p;
 }
 
+function Lens(x, y, h, segments) {
+  if (segments == undefined) {
+    segments = 20;
+  }
+  var p = new Circle(x, y, h, segments);
+  for (var i = 0; i < p.numVerts(); i++) {
+    p.vertices[i].x = p.vertices[i].x < x + h / 3 ? x + h / 3 : p.vertices[i].x;
+  }
+  p.name = 'Lens';
+  return p;
+}
+
 function Square(x, y, s, segments) {
   if (segments == undefined) segments = 20;
 
@@ -237,6 +249,7 @@ function Square(x, y, s, segments) {
   p.name = 'Square';
   return p;
 }
+
 Circle.prototype = new Polygon;
 Square.prototype = new Polygon;
-
+Lens.prototype = new Polygon;

@@ -4,7 +4,7 @@
 <script src="polygon.js"></script>
 
 <body>
-<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<canvas id="canvas" width="1000" height="1000" style="border:1px solid #000000"></canvas>
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -20,7 +20,7 @@ var e = new Point(0, 0);
 var poly = new Polygon(
   [a, b, c],
   [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
-poly = new Circle(width / 2, height / 2, width / 4, 100);
+poly = new Circle(width / 2, height / 2, width / 3, 5);
 var n1 = 1;
 var n2 = 2;
 
