@@ -15,6 +15,7 @@ init(ctx);
 setInterval(redraw, 100);
 var width = canvas.width;
 var height = canvas.height;
+var size = width / 5;
 var a = new Point(100, .8 * height);
 var b = new Point(.8 * width, 100);
 var c = new Point(b.x, a.y);
@@ -22,44 +23,46 @@ var e = new Point(0, 0);
 var poly = new Polygon(
   [a, b, c],
   [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
-poly = new Circle(width / 2, height / 2, width / 3, 5);
+poly = new Circle(width / 2, height / 2, size, 5);
 var n1 = 1;
 var n2 = 1.5;
 
 var mouseStart = new Point(10, height / 2);
 var mouse = add(mouseStart, new Point(1, 0));
-var path = [];
+var paths = [];
 var p = new Point(0, 0);
 var q = new Point(1, 0);
 var dirty = true;
 Mousetrap.bind(['1'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 3);
+  poly = new Circle(width / 2, height / 2, size, 3);
   dirty = true;}); 
 Mousetrap.bind(['2'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 4);
+  poly = new Circle(width / 2, height / 2, size, 4);
   dirty = true;}); 
 Mousetrap.bind(['4'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 5);
+  poly = new Circle(width / 2, height / 2, size, 5);
   dirty = true;});
 Mousetrap.bind(['5'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 6);
+  poly = new Circle(width / 2, height / 2, size, 6);
   dirty = true;});
 Mousetrap.bind(['6'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 7);
+  poly = new Circle(width / 2, height / 2, size, 7);
   dirty = true;});
 Mousetrap.bind(['7'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 8);
+  poly = new Circle(width / 2, height / 2, size, 8);
   dirty = true;});
 Mousetrap.bind(['8'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 20);
+  poly = new Circle(width / 2, height / 2, size, 20);
   dirty = true;});
 Mousetrap.bind(['9'], function(e) {
-  poly = new Circle(width / 2, height / 2, width / 3, 1000);
+  poly = new Circle(width / 2, height / 2, size, width);
   dirty = true;}); 
 Mousetrap.bind(['0'], function(e) {
-  poly = new Lens(width / 2, height / 2, width / 3, 1000);
+  poly = new Lens(width / 2, height / 2, size, width);
   dirty = true;});
-
+Mousetrap.bind(['a'], function(e) {
+  paths.push([]);
+});
 
 canvas.addEventListener('mousedown', function(evt) {
   var x = evt.clientX;
@@ -79,6 +82,7 @@ function update(x, y) {
   mouse.y = y;
   p = mouseStart;
   q = mouse;
+  var path;
   if (p instanceof Point && q instanceof Point) {
     if (!poly.contains(p)) {
       var index = n1 / n2;
@@ -91,6 +95,7 @@ function update(x, y) {
       path = [p, q];
     }
   }
+  paths[paths.length - 1] = path;
 };
 
 function redraw() {
@@ -102,11 +107,14 @@ function redraw() {
   stroke(0);
   poly.draw();
   stroke(255, 0, 0);
-  for (var i = 0; i < path.length - 1; i = i + 1) {
-    var p = path[i];
-    var q = path[i + 1];
-    circle(p.x, p.y, 3);
-    line(p, q); 
+  for (var j = 0; j < paths.length; j++) {
+    var path = paths[j];
+    for (var i = 0; i < path.length - 1; i = i + 1) {
+      var p = path[i];
+      var q = path[i + 1];
+      circle(p.x, p.y, 3);
+      line(p, q); 
+    }
   }
   fill(100);
   text('n1 = 1', 10, 40);
