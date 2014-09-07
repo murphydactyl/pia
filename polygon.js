@@ -54,6 +54,14 @@ Polygon.prototype.traceRayOnce = function(p, q, index) {
   return false; 
 }
 
+Polygon.prototype.traceRayAgain = function(p, q, index) {
+  var qOff = lerp(p, q, 1e-10);
+  if (this.ptOnBoundary(p) && this.contains(qOff)) {
+    return this.traceRayFromInside(p, q);
+  }
+  return false;
+}
+
 Polygon.prototype.traceRayFromOutside = function(p, q, index) {
   var ray1 = this.traceRayOnce(p, q, index);
   if (!ray1) return false;
@@ -78,19 +86,15 @@ Polygon.prototype.traceRay = function(p, q, index, reps) {
   }
   var path = [p];
   for (var i = 0; i < reps; i++) {
-    if (p.i) {
-      var e = this.edge(p.i);
-      if (p.onLineSegment(e.p, e.q)) {
-        p = lerp(p, q, 1e-10);
-      }
-    }
+    p = lerp(p, q, 1e-10);
     var ray = this.traceRayOnce(p, q, index);
     if (!ray) {
       break;
     }
     p = ray.enter;
-    q = ray.exit;
-    path[path.length] = p;          
+    q = rescale(ray.exit, p, 1000);
+    path[path.length] = p;
+    index = 1 / index;        
   }
   path[path.length] = q;
   return path;

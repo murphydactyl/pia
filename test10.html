@@ -61,7 +61,7 @@ Mousetrap.bind(['0'], function(e) {
   poly = new Lens(width / 2, height / 2, size, width);
   dirty = true;});
 Mousetrap.bind(['a'], function(e) {
-  paths.push([]);
+  paths.push([mouseStart, mouse]);
 });
 
 canvas.addEventListener('mousedown', function(evt) {
@@ -70,39 +70,51 @@ canvas.addEventListener('mousedown', function(evt) {
   mouseStart.x = x;
   mouseStart.y = y;
   dirty = true;
+  mouse.isDown = true;
 });
+
+canvas.addEventListener('mouseup', function(evt) {
+  mouse.isDown = false;
+});
+
 
 $("#canvas").mousemove(function(evt) {
   dirty = true;
-  update(evt.clientX, evt.clientY)
+  if (mouse.isDown) {
+    mouseStart.x = evt.clientX;
+    mouseStart.y = evt.clientY;
+  } else {
+    mouse.x = evt.clientX;
+    mouse.y = evt.clientY;
+  }
 });
 
-function update(x, y) {
-  mouse.x = x;
-  mouse.y = y;
-  p = mouseStart;
-  q = mouse;
-  var path;
-  if (p instanceof Point && q instanceof Point) {
-    if (!poly.contains(p)) {
-      var index = n1 / n2;
-      path = poly.traceRayFromOutside(p, q, index, 20);
-    } else {
+function update() {
+  for (var i = 0; i < paths.length; i++) {
+    var path = paths[i];
+    var p = path[0];
+    var q = path[1];
+    if (p instanceof Point && q instanceof Point) {
       var index = n2 / n1;
-      path = poly.traceRayFromInside(p, q, index, 20);
+      if (!poly.contains(p)) {
+        index = n1 / n2;
+      }
+      path = poly.traceRay(p, q, index, 20);
     }
-    if (!path) {
-      path = [p, q];
+    if (path) {
+      paths[i] = path;
+    } else {
+      paths[i] = [paths[i][0], paths[i][1]];
     }
   }
-  paths[paths.length - 1] = path;
 };
 
 function redraw() {
   if (!dirty) {
     return;
+  } else {
+    update();
   }
-  update(mouse.x, mouse.y);
   clear(250);
   stroke(0);
   poly.draw();
