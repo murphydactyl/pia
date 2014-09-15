@@ -1,0 +1,128 @@
+<html>
+<script src="jquery-1.11.1.js"></script>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+
+<body>
+<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var width = canvas.width;
+var height = canvas.height;
+var img = ctx.createImageData(width, height);
+var startTimeMs = Date.now();
+
+var buf = new ArrayBuffer(img.width * img.height * 4);
+var buf8 = new Uint8ClampedArray(buf);
+var buf32 = new Uint32Array(buf);
+
+var mouse = false;
+
+var frame = 0;
+init(ctx);
+setInterval(redraw, 10);
+
+var E = [];
+E[0] = new Float32Array(width * height);
+E[1] = new Float32Array(width * height);
+E[2] = new Float32Array(width * height);
+E[3] = new Float32Array(width * height);
+
+function initWaveEquation(A, B, C) {
+  for (var i = 0; i < A.length; i++) {
+    var x = i % width;
+    var y = i / width;
+    A[i] = 0;
+    B[i] = 0;
+    C[i] = 0;
+  }
+}
+
+function clamp(t, min, max) {
+  return Math.max(min, Math.min(t, max));
+}
+
+initWaveEquation(E[0], E[1], E[2]);
+
+function disturb(B, x, y) {
+  B[y * width + x] = 1000;
+}
+
+function updateWaveEquation(A, B, C) {
+  var h_t = .01;
+  for (var x = 1; x < width - 1; x++) {
+    for (var y = 1; y < height - 1; y++) {
+       var i = y * width + x;
+       var left = i - 1;
+       var right = i + 1;
+       var up = i - width;
+       var down = i + width;
+       if (x == 1 || x == width - 2) {
+         var vx = -1;
+       } else {
+         var vx = 1;
+       }
+       if (y == 1 || y == height - 2) {
+         var vy = -1;
+       } else {
+         var vy = 1;
+       }
+       var xx = vx * (B[left] - 2 * B[i] + B[right]);
+       var yy = vy * (B[down] - 2 * B[i] + B[up]);
+       C[i] = h_t * (xx + yy) + 2 * B[i] - A[i];
+     }
+  } 
+}
+
+function updateDisplay(data) {
+  var max = data[0]; 
+  for (var i = 0; i < data.length; i++) {
+    if (data[i] > max) {
+      max = data[i];
+    }
+  }
+  $("#max-value").text("Max: " + max);
+  for (var i = 0; i < data.length; i++) {
+    var val = clamp(data[i], 0, 255);
+    buf32[i] = 0xff000000 | (val << 16) | (val << 8) | val;
+  }
+  img.data.set(buf8);
+  ctx.putImageData(img, 0, 0);
+}
+
+canvas.addEventListener('mousemove', function(evt) {
+  var x = evt.clientX;
+  var y = evt.clientY;
+});
+
+canvas.addEventListener('mousedown', function(evt) {
+  mouse = new Point(evt.clientX, evt.clientY);
+});
+
+
+function redraw() {
+  clear();
+  if (mouse) {
+    disturb(E[1], mouse.x, mouse.y);
+    mouse = false;
+  }
+  updateWaveEquation(E[0],E[1],E[2]);
+  updateDisplay(E[2]);
+  E = [E[1], E[2], E[0]];
+  frame++;
+  $("#frame_rate").text((1000.0 * frame) / (Date.now() - startTimeMs) + "");
+  if (frame == 1000) {
+    frame = 0;
+    startTimeMs = Date.now();
+  }
+}
+
+</script>
+<br>
+Framerate: <span id="frame_rate"></span> frames/sec
+<br>
+<span id="max-value"></span>
+</body>
+</html>
