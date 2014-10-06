@@ -225,6 +225,31 @@ function Circle(ox, oy, radius, segments) {
   return p;
 }
 
+function ConcaveLens(ox, oy, radius, theta, segments, gap) {
+  if (segments == undefined) segments = 20;
+  if (gap == undefined) gap = 0.1 * radius;
+  var p = new Polygon();
+  p.vertices = new Array(2 * segments);
+  p.edges = new Array(p.vertices.length);
+  var dtheta = theta / segments;
+  var left_angle = theta / 2 + dtheta / 2;
+  var right_angle = Math.PI + theta/2 + dtheta / 2;
+  for (var i = 0; i < segments; i++) {
+    left_angle -= dtheta;
+    right_angle -= dtheta;
+    p.vertices[i] = new Point((ox - radius - gap) + radius * Math.cos(left_angle),
+                               oy + radius * Math.sin(left_angle));
+    p.vertices[i + segments] = new Point((ox + gap + radius) + radius * Math.cos(right_angle),
+                               oy + radius * Math.sin(right_angle));
+  }
+
+  for (var i = 0; i < p.vertices.length; i++) {
+    p.edges[i] = {p: i, q: (i + 1) == p.vertices.length ? 0 : i + 1};
+  } 
+  p.name = 'Concave_Lens';
+  return p;
+}
+
 function Lens(x, y, h, segments) {
   if (segments == undefined) {
     segments = 20;
@@ -237,6 +262,7 @@ function Lens(x, y, h, segments) {
   p.name = 'Lens';
   return p;
 }
+
 
 function Square(x, y, s, segments) {
   if (segments == undefined) segments = 20;

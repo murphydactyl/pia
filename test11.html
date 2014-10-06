@@ -1,0 +1,152 @@
+<html>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+<script src="mousetrap.js"></script>
+<script src="jquery-1.11.1.js"></script>
+
+<body>
+<canvas id="canvas" width="1000" height="1000" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+init(ctx);
+setInterval(redraw, 100);
+var width = canvas.width;
+var height = canvas.height;
+var size = width / 5;
+var a = new Point(100, .8 * height);
+var b = new Point(.8 * width, 100);
+var c = new Point(b.x, a.y);
+var e = new Point(0, 0);
+var poly = new Polygon(
+  [a, b, c],
+  [{p: 0, q: 1}, {p: 1, q: 2}, {p: 2, q: 0}]);
+var n1 = 1;
+var n2 = 1.5;
+var offsetX = -200;
+var polys = new Array(0);
+polys[0] = new Circle(offsetX + width / 2, height / 2, size, 3);
+polys[1] = new ConcaveLens(200 + width / 2, height / 2, width / 4, Math.PI / 2, 100, 10);
+
+var mouseStart = new Point(10, height / 2);
+var mouse = add(mouseStart, new Point(1, 0));
+var paths = [];
+var p = new Point(0, 0);
+var q = new Point(1, 0);
+var dirty = true;
+Mousetrap.bind(['1','2','3','4','5','6'], function(e) {
+  if (e.keyCode) {
+    var num = e.keyCode - 46;
+  } else {
+    var num = 3;
+  }
+  polys[0] = new Circle(offsetX + width / 2, height / 2, size, num);
+  dirty = true;}); 
+Mousetrap.bind(['7'], function(e) {
+  polys[0] = new Circle(offsetX + width / 2, height / 2, size, 20);
+  dirty = true;});
+Mousetrap.bind(['8'], function(e) {
+  polys[0] = new Circle(offsetX + width / 2, height / 2, size, width);
+  dirty = true;}); 
+Mousetrap.bind(['9'], function(e) {
+  polys[0] = new ConcaveLens(.50 * width, height / 2, -width / 2, Math.PI / 3, 100, 100);
+  dirty = true;}); 
+Mousetrap.bind(['0'], function(e) {
+  polys[0] = new ConcaveLens(-1000, height / 2, 1, Math.PI / 3, 100, 100);
+  dirty = true;}); 
+Mousetrap.bind(['a'], function(e) {
+  paths.push([mouseStart, mouse]);
+});
+Mousetrap.trigger('1');
+
+canvas.addEventListener('mousedown', function(evt) {
+  var x = evt.clientX;
+  var y = evt.clientY;
+  mouseStart.x = x;
+  mouseStart.y = y;
+  dirty = true;
+  mouse.isDown = true;
+});
+
+canvas.addEventListener('mouseup', function(evt) {
+  mouse.isDown = false;
+});
+
+$("#canvas").mousemove(function(evt) {
+  dirty = true;
+  if (mouse.isDown) {
+    mouseStart.x = evt.clientX;
+    mouseStart.y = evt.clientY;
+  } else {
+    mouse.x = evt.clientX;
+    mouse.y = evt.clientY;
+  }
+});
+
+function update() {
+  for (var c = 0; c < polys.length; c++) {
+    for (var i = 0; i < paths.length; i++) {
+      var path = paths[i];
+      var p = path[path.length - 2];
+      var q = path[path.length - 1];
+      if (p instanceof Point && q instanceof Point) {
+        var index = n2 / n1;
+        if (!polys[c].contains(p)) {
+          index = n1 / n2;
+        }
+        future = polys[c].traceRay(p, q, index, 20);
+      }
+      if (future) {
+        paths[i] = paths[i].slice(0, paths[i].length - 2).concat(future);
+      } else {
+        paths[i] = [paths[i][0], paths[i][1]];
+      }
+    }
+   }
+};
+
+function redraw() {
+  if (!dirty) {
+    return;
+  } else {
+    parallelRays(mouse.x, mouse.y);
+    update();
+  }
+  clear(250);
+  for (var c = 0; c < polys.length; c++) {
+    stroke(0);
+    var poly = polys[c];
+    poly.draw()
+    stroke(255, 0, 0);
+    for (var j = 0; j < paths.length; j++) {
+      var path = paths[j];
+      for (var i = 0; i < path.length - 1; i++) {
+        var p = path[i];
+        var q = path[i + 1];
+        //circle(p.x, p.y, 3);
+        line(p, q); 
+      }
+    }
+  }
+  fill(100);
+  text('n1 = 1', 10, 40);
+  text('n2 = ' + n2, canvas.width / 2 + 10, 40);
+  dirty = false;
+}
+
+function parallelRays(ox, oy) {
+  var scale = 10;
+  paths = [];
+  var n = 10;
+  for (var i = -n; i < n; i++) {
+    paths.push([new Point(ox, oy + i * scale),
+                new Point(ox + 1, oy + i * scale)]);
+  }
+}
+
+
+</script>
+</body>
+</html>
