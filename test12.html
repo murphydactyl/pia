@@ -1,0 +1,147 @@
+<html>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+<script src="utils.js"></script>
+<script src="mousetrap.js"></script>
+<script src="jquery-1.11.1.js"></script>
+
+<body>
+<canvas id="canvas" width="2000" height="1000" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+init(ctx);
+var width = canvas.width;
+var height = canvas.height;
+
+var WAVELENGTH = .001;
+var WAVE_NUMBER = 2 * Math.PI / WAVELENGTH;
+var MASK_X = .65 * width;
+var SCREEN_X = .75 * width;
+var SCREEN_MIN_Y = -10 * height;
+var SCREEN_MAX_Y = 10 * height;
+var scale_factor = 0.01;
+var holes = VerticalPoints(MASK_X,
+                           .5 * height - .5 * WAVELENGTH,
+                           .5 * height + .5 * WAVELENGTH, 1);
+var screens = VerticalPoints(SCREEN_X, SCREEN_MIN_Y, SCREEN_MAX_Y, height);
+var sources = [new Point(0.01 * width, .5 * height)]
+var amplitudes = new Array(screens.length);
+var powers = new Array(screens.length);
+
+setInterval(
+function() {
+    if (dirty) {
+      reset();
+      update();
+      redraw();
+    }
+    dirty = false;
+}, 100);
+
+canvas.addEventListener('mousemove', function(evt) {
+  var x = evt.clientX;
+  var y = evt.clientY;
+  sources[0].x = x;
+  sources[0].y = y;
+  dirty = true;
+});
+
+Mousetrap.bind(['='], function(e) {
+  scale_factor = scale_factor * 2;
+  dirty = true;
+});
+Mousetrap.bind(['-'], function(e) {
+  scale_factor = scale_factor / 2;
+  dirty = true;
+});
+
+function reset() {
+  for (var i = 0; i < amplitudes.length; i++) {
+    amplitudes[i] = new Point(0, 0);
+    powers[i] = 0;
+  }
+}
+
+function update() {
+  for (var i = 0; i < sources.length; i++) {
+    for (var j = 0; j < holes.length; j++) {
+      var lengthIJ = distance(sources[i], holes[j]);
+      for (var k = 0; k < screens.length; k++) {
+        var lengthJK = distance(holes[j], screens[k]);
+        var angle = WAVE_NUMBER * (lengthIJ + lengthJK); 
+        amplitudes[k].x += Math.cos(angle);
+        amplitudes[k].y += Math.sin(angle);
+      }
+    }
+  }
+  for (var i = 0; i < powers.length; i++) {
+    powers[i] = dot(amplitudes[i], amplitudes[i]);
+  }
+}
+
+function drawSources() {
+  stroke(255, 0, 0);
+  for (var i = 0; i < sources.length; i++) {
+    circle(sources[i].x, sources[i].y, 10)
+  }
+}
+
+function drawMask() {
+  stroke(0);
+  line(new Point(MASK_X, 0), new Point(MASK_X, height));
+  stroke(255);
+  for (var i = 0; i < holes.length; i++) {
+    circle(holes[i].x, holes[i].y, 1);
+  }
+}
+
+function drawScreenPower() {
+  stroke(225, 0, 0);
+  //var argmax = powers.argmax();
+  //var scale = (width - SCREEN_X) / Math.max(1, powers[argmax]);
+  var globalScale = scale_factor * (width - SCREEN_X) * sources.length / height;
+  for (var k = 0; k < screens.length; k++) {
+    var scale = globalScale;
+    var power = scale * dot(amplitudes[k], amplitudes[k]);
+    line(new Point(SCREEN_X, k),
+         new Point(SCREEN_X + power, k));
+  }
+}
+
+function redraw() {
+  clear(250);
+  stroke(100);
+  for (var i = 0; i < sources.length; i++) {
+    for (var j = 0; j < holes.length; j++) {
+      //line(sources[i], holes[j]);
+    }
+  }
+  stroke(200);
+  for (var j = 0; j < holes.length; j++) {
+    for (var k = 0; k < screens.length; k++) {
+      //line(holes[j], screens[k]);
+    }
+  }
+  drawSources();
+  drawMask();
+  drawScreenPower();
+}
+
+function VerticalPoints(x, y1, y2, num) {
+  var spaces = linspace(y1, y2, num);
+  var points = new Array(num);
+  for (var i = 0; i < num; i++) {
+    points[i] = new Point(x, spaces[i]);
+  }
+  return points;
+}
+
+reset();
+update();
+redraw();
+</script>
+</body>
+</html>

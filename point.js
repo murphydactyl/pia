@@ -40,6 +40,10 @@ function cross(p, q) {
   console.log("ouch");
 }
 
+function norm(p) {
+  return Math.sqrt(p.x * p.x + p.y * p.y);
+}
+
 function crosses(x1, x2, x3, x4) {
   var a = subtract(x2, x1);
   var f = subtract(x4, x1);
