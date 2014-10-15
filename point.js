@@ -245,7 +245,10 @@ function parallel(x1, x2, x3, x4) {
 
 function distance(p, q) {
   if (p === undefined) {
-    console.log('I caught p is undefined.');
+    console.log('In distance(p, q), I caught p is undefined.');
+  }
+  if (q === undefined) {
+    console.log('In distance(p, q), I caught q is undefined.');
   }
   var dx = p.x - q.x;
   var dy = p.y - q.y;
