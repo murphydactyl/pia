@@ -22,7 +22,7 @@ var MASK_X = .5 * width;
 var SCREEN_X = .75 * width;
 var SCREEN_MIN_Y = -10 * height;
 var SCREEN_MAX_Y = 11 * height;
-var SLIT_GAP = 2 * WAVELENGTH;
+var SLIT_GAP = 5 * WAVELENGTH;
 var scale_factor = 1.0;
 var holes = VerticalPoints(MASK_X,
                            .5 * height - SLIT_GAP - 0.5 * WAVELENGTH,
@@ -75,13 +75,13 @@ function update() {
   var dx = SCREEN_X - MASK_X;
   for (var i = 0; i < sources.length; i++) {
     for (var j = 0; j < holes.length; j++) {
-      var lengthIJ = distance(sources[i], holes[j]);
+      var lengthIJ = Math.abs(sources[i].x - holes[j].x);
       for (var k = 0; k < screens.length; k++) {
         var lengthJK = distance(holes[j], screens[k]);
-        var angle = WAVE_NUMBER * (lengthIJ + lengthJK); 
         var a = new Point(dx, screens[k].y - ds - holes[j].y); 
         var b = new Point(dx, screens[k].y + ds - holes[j].y);
         var scale = Math.acos(dot(a, b) / (Math.sqrt(dot(a, a) * dot(b, b)))) / Math.PI;
+        var angle = WAVE_NUMBER * (lengthIJ + lengthJK); 
         amplitudes[k].x += scale * Math.cos(angle);
         amplitudes[k].y += scale * Math.sin(angle);
       }
