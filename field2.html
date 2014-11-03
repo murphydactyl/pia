@@ -1,0 +1,108 @@
+<html>
+<script src="jquery-1.11.1.js"></script>
+<script src="point.js"></script>
+<script src="2dg.js"></script>
+<script src="polygon.js"></script>
+
+<body>
+<canvas id="canvas" width="600" height="500" style="border:1px solid #000000"></canvas>
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var width = canvas.width;
+var height = canvas.height;
+var startTimeMs = Date.now();
+var mouse = false;
+var frame = -1;
+var U = [];
+var MESH_SIZE = width / 10;
+U[0] = new Float32Array(MESH_SIZE);
+U[1] = new Float32Array(MESH_SIZE);
+U[2] = new Float32Array(MESH_SIZE);
+var DX = width / (MESH_SIZE - 1);
+var DT = .01;
+var COURANT_NUMBER = 10 * DT / DX;
+var COURANT_NUMBER_SQ = COURANT_NUMBER * COURANT_NUMBER;
+init(ctx);
+setInterval(redraw, 33);
+initWaveEquation(U);
+
+function initWaveEquation(E) {
+  var U = E[0];
+  var U_1 = E[1];
+  var U_2 = E[2];
+  for (var i = 0; i < MESH_SIZE; i++) {
+    U[i] = 0;
+    U_1[i] = 0;
+    U_2[i] = 0;
+  }
+  U_1[U_1.length / 2] = 3;
+  for (var i = 1; i < MESH_SIZE - 1; i++) {
+    U[i] = U_1[i] - 0.5 * COURANT_NUMBER_SQ * (U_1[i + 1] - 2*U_1[i] + U_1[i - 1]);
+  }
+  E[2] = U_1;
+  E[1] = U;
+}
+
+function updateWaveEquation(E) {
+  var U = E[0];
+  var U_1 = E[1];
+  var U_2 = E[2];
+  for (var i = 1; i < MESH_SIZE - 1; i++) {
+    U[i] = 2 * U_1[i] - U_2[i] - COURANT_NUMBER_SQ * (U_1[i + 1] - 2 * U_1[i] + U_1[i - 1]);
+  }
+  U[0] = 0;
+  U[MESH_SIZE - 1] = 0;
+  plot(U);
+  E[2] = U_1;
+  E[1] = U;
+}
+
+function plot(Y) {
+  var dx = width / (Y.length - 1);
+  var x = 0;
+  ctx.beginPath();
+  ctx.moveTo(0, height / 2);
+  for (var i = 0; i < Y.length; i++) {
+    ctx.lineTo(x, height / 2 - Y[i]);
+    x += dx;
+  }
+  ctx.stroke();
+}
+
+// HANDLE MOUSE
+canvas.addEventListener('mousemove', function(evt) {
+  var x = evt.clientX;
+  var y = evt.clientY;
+});
+
+canvas.addEventListener('mousedown', function(evt) {
+  mouse = new Point(evt.clientX, evt.clientY);
+});
+
+
+function redraw() {
+  clear();
+  if (mouse) {
+    mouse = false;
+  }
+  updateWaveEquation(U);
+  frame++;
+  $("#frame_rate").text((1000.0 * frame) / (Date.now() - startTimeMs) + "");
+  if (frame == 1000) {
+    frame = 0;
+    startTimeMs = Date.now();
+  }
+}
+
+function clamp(t, min, max) {
+  return Math.max(min, Math.min(t, max));
+}
+
+</script>
+<br>
+Framerate: <span id="frame_rate"></span> frames/sec
+<br>
+<span id="max-value"></span>
+</body>
+</html>
