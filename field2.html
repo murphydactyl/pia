@@ -14,24 +14,18 @@ var height = canvas.height;
 var startTimeMs = Date.now();
 var frame = -1;
 var MESH_SIZE = width / 10;
-var U = [];
-U[0] = new Float32Array(MESH_SIZE);
-U[1] = new Float32Array(MESH_SIZE);
-U[2] = new Float32Array(MESH_SIZE);
-var I = new Float32Array(MESH_SIZE);
+var U = new Float32Array(MESH_SIZE);
+var U_1 = new Float32Array(MESH_SIZE);
+var U_2 = new Float32Array(MESH_SIZE);
 var DX = width / (MESH_SIZE - 1);
-var DT = .1;
-var COURANT_NUMBER = 10 * DT / DX;
+var DT = .01;
+var SPEED = 100;
+var COURANT_NUMBER = SPEED * DT / DX;
 var COURANT_NUMBER_SQ = COURANT_NUMBER * COURANT_NUMBER;
+var FREQUENCY = 10;
 init(ctx);
-setInterval(redraw, 33);
-zeroOut(I);
-setPeak(I, width / 2, 50);
-initWaveEquation(U);
-
-function setPeak(I, x, y) {
-  I[x] = y;
-}
+setInterval(redraw, 32);
+var mustInitialize = true;
 
 function zeroOut(A) {
   for (var i = 0; i < A.length; i++) {
@@ -39,35 +33,31 @@ function zeroOut(A) {
   }
 }
 
-function initWaveEquation(E) {
-  var U = E[0];
-  var U_1 = E[1];
-  var U_2 = E[2];
-  for (var i = 0; i < MESH_SIZE; i++) {
-    U[i] = 0;
-    U_1[i] = I[i];
-    U_2[i] = 0;
+function bump(A, x0, y, sigma) {
+  sigma = sigma * sigma;
+  for (var i = 0; i < A.length; i++) {
+    var x = i / A.length;
+    A[i] = y * Math.exp(-(x - x0) * (x - x0) / sigma);
   }
-  
-  for (var i = 1; i < MESH_SIZE - 1; i++) {
-    U[i] = U_1[i] - 0.5 * COURANT_NUMBER_SQ * (U_1[i + 1] - 2*U_1[i] + U_1[i - 1]);
-  }
-  E[2] = U_1;
-  E[1] = U;
 }
 
-function updateWaveEquation(E) {
-  var U = E[0];
-  var U_1 = E[1];
-  var U_2 = E[2];
-  for (var i = 1; i < MESH_SIZE - 1; i++) {
-    U[i] = 2 * U_1[i] - U_2[i] - COURANT_NUMBER_SQ * (U_1[i + 1] - 2 * U_1[i] + U_1[i - 1]);
+function updateWaveEquation(U, U_1, U_2) {
+  if (mustInitialize) {
+    zeroOut(U);
+    zeroOut(U_1);
+    zeroOut(U_2);
+    bump(U, 0.5, 100, .1);
+    bump(U_1, (0.5 * width - DT * SPEED) / width, 100, .1);
+    console.log("Initialized.");
+    mustInitialize = false;
+  } else {
+    for (var i = 1; i < MESH_SIZE - 1; i++) {
+      U[i] = 2 * U_1[i] - U_2[i] + COURANT_NUMBER_SQ * (U_1[i + 1] - 2 * U_1[i] + U_1[i - 1]);
+    }
   }
   U[0] = 0;
   U[MESH_SIZE - 1] = 0;
-  plot(I);
-  E[2] = U_1;
-  E[1] = U;
+  plot(U);
 }
 
 function plot(Y) {
@@ -82,22 +72,13 @@ function plot(Y) {
   ctx.stroke();
 }
 
-// HANDLE MOUSE
-canvas.addEventListener('mousemove', function(evt) {
-  var x = evt.clientX;
-  var y = evt.clientY;
-});
-
-canvas.addEventListener('mousedown', function(evt) {
-  mouse = new Point(evt.clientX, evt.clientY);
-  //setPeak(mouse.x, mouse.y - height / 2);
-  //initWaveEquation(U);
-});
-
-
 function redraw() {
   clear();
-  updateWaveEquation(U);
+  updateWaveEquation(U, U_1, U_2);
+  var tmp = U;
+  U = U_2;
+  U_2 = U_1;
+  U_1 = tmp;
   frame++;
   $("#frame_rate").text((1000.0 * frame) / (Date.now() - startTimeMs) + "");
   if (frame == 1000) {
@@ -106,6 +87,16 @@ function redraw() {
   }
 }
 
+// HANDLE MOUSE
+canvas.addEventListener('mousemove', function(evt) {
+  var x = evt.clientX;
+  var y = evt.clientY;
+});
+
+canvas.addEventListener('mousedown', function(evt) {
+  mouse = new Point(evt.clientX, evt.clientY);
+  setPeak(I, MESH_SIZE * mouse.x / width, height / 2 - mouse.y);
+});
 function clamp(t, min, max) {
   return Math.max(min, Math.min(t, max));
 }
